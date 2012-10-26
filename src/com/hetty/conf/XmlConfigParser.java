@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hetty.object.Application;
+import com.hetty.object.HettyException;
 import com.hetty.object.Service;
 import com.hetty.object.ServiceProvider;
 import com.hetty.object.ServiceVersion;
@@ -142,8 +143,8 @@ public class XmlConfigParser implements ConfigParser {
 		for (Element element : sList) {
 			String user = element.attributeValue("user");
 			String service = element.attributeValue("service");
-			if(StringUtil.isEmpty(user) || StringUtil.isNotEmpty(service)){
-				throw new RuntimeException("In config file's security-settings,user or service cannot't be empty!");
+			if(StringUtil.isEmpty(user) || StringUtil.isEmpty(service)){
+				throw new HettyException("In config file's security-settings,user or service cannot't be empty!");
 			}
 			String version = element.attributeValue("version");
 	
