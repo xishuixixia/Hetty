@@ -54,3 +54,30 @@ properties.file=config.xml #配置service定义文件
 </service>
 我们配置了test.BasicAPI接口，接口名字为basic，有一个版本，版本号为1，且为默认版本。
 第三部分配置客户端的调用的版本，比如可以配置client1调用basic接口的1版本。
+
+3.客户端调用
+
+public static void main(String[] args) throws MalformedURLException {
+		
+		String url = "http://localhost:8081/apis/hello/";
+
+		HessianProxyFactory factory = new HessianProxyFactory();
+
+		factory.setUser("server1");
+
+		factory.setPassword("server1");
+
+		factory.setOverloadEnabled(true);
+
+		final Hello basic = (Hello) factory.create(Hello.class, url);
+		
+//		System.out.println("SayHello:" + basic.hello("guolei"));
+//		System.out.println("SayHello:" + basic.test());
+//		System.out.println(basic.getAppSecret("11"));
+//		User user = basic.getUser(1);
+//		System.out.println(user.getRoleList().size());
+		//测试方法重载
+		System.out.println(basic.hello());
+		System.out.println(basic.hello("guolei"));
+		System.out.println(basic.hello("guolei","hetty"));
+	}
