@@ -25,7 +25,7 @@ public class ServiceHandler {
 	//key:service name value:service
 	public static final Map<String,Service> serviceMap = new HashMap<String,Service>();
 	//key:client user # service name value:version
-	public static final Map<StringBuffer,String> versionMap = new HashMap<StringBuffer,String>();
+	public static final Map<String,String> versionMap = new HashMap<String,String>();
 	
 	/**
 	 * 1.if service has a non default version,add
@@ -63,7 +63,7 @@ public class ServiceHandler {
 		if(!isServiceExits(version.getService())){
 			throw new HettyException("please check your configure file,service["+version.getService()+"] can't find.");
 		}
-		versionMap.put(version.getUser().append("#").append(version.getService()), version.getVersion());
+		versionMap.put(version.getUser().append("#").append(version.getService()).toString(), version.getVersion());
 	}
 	/**
 	 * according the request to invoke the method and return the invoke result
@@ -91,7 +91,7 @@ public class ServiceHandler {
 			}
 			StringBuffer serviceKey = new StringBuffer(user).append("#")
 					.append(serviceName);
-			String version = versionMap.get(serviceKey);
+			String version = versionMap.get(serviceKey.toString());
 			Service service = serviceMap.get(serviceName);
 			if (service == null) {
 				throw new RuntimeException("we cannot find service["
