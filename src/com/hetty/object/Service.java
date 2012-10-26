@@ -2,7 +2,7 @@ package com.hetty.object;
 
 import java.io.Serializable;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public  class Service implements Serializable{
@@ -17,7 +17,7 @@ public  class Service implements Serializable{
 	
 	protected String defaultVersion = null;
 	
-	private Map<String,ServiceProvider> providerMap = new HashMap<String,ServiceProvider>();
+	private Map<String,ServiceProvider> providerMap = new LinkedHashMap<String,ServiceProvider>();
 
 	private boolean overload =false;
 	
