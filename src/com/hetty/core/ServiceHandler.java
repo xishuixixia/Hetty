@@ -60,6 +60,9 @@ public class ServiceHandler {
 		if(version.getVersion() == null){
 			return;
 		}
+		if(!isServiceExits(version.getService())){
+			throw new HettyException("please check your configure file,service["+version.getService()+"] can't find.");
+		}
 		versionMap.put(version.getUser().append("#").append(version.getService()), version.getVersion());
 	}
 	/**

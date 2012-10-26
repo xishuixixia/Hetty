@@ -10,16 +10,8 @@ public class HettySecurity {
 	
 	private static final Map<String, Application> applicationMap = new HashMap<String, Application> ();
 	
-	private static final Map<String, String> serviceVersionMap = new HashMap<String, String> ();
-	
 	public static void addToApplicationMap(Application app){
 		applicationMap.put(app.getUser(), app);
-	}
-	public static void addToVersionMap(String serviceName,String version){
-		if(!ServiceHandler.isServiceExits(serviceName)){
-			
-		}
-		serviceVersionMap.put(serviceName, version);
 	}
 	
 	/**
