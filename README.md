@@ -71,12 +71,6 @@ public static void main(String[] args) throws MalformedURLException {
 
 		final Hello basic = (Hello) factory.create(Hello.class, url);
 		
-//		System.out.println("SayHello:" + basic.hello("guolei"));
-//		System.out.println("SayHello:" + basic.test());
-//		System.out.println(basic.getAppSecret("11"));
-//		User user = basic.getUser(1);
-//		System.out.println(user.getRoleList().size());
-		//测试方法重载
 		System.out.println(basic.hello());
 		System.out.println(basic.hello("guolei"));
 		System.out.println(basic.hello("guolei","hetty"));
