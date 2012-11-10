@@ -18,8 +18,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.hetty.conf.HettyConfig;
+import com.hetty.core.ssl.SslHettyChannelPipelineFactory;
 import com.hetty.object.Application;
+import com.hetty.object.HettyException;
 import com.hetty.plugin.IPlugin;
+import com.hetty.util.FileUtil;
+import com.hetty.util.StringUtil;
 
 
 /**
@@ -30,37 +34,54 @@ public final class Hetty {
 
 	private static  Logger logger = LoggerFactory.getLogger(Hetty.class);
 	
-	private ServerBootstrap bootstrap = null;
+	private ServerBootstrap httpBootstrap = null;
+	private ServerBootstrap httpsBootstrap = null;
 	private HettyConfig hettyConfig = HettyConfig.getInstance();
-	private int listenPort;
+	private int httpListenPort;
+	private int httpsListenPort;
 	
 	public Hetty(){
 		HettyConfig.getInstance().loadPropertyFile("server.properties");//default file is this.
 	}
 	public Hetty(String file){
-		HettyConfig.getInstance().loadPropertyFile("file");
+		HettyConfig.getInstance().loadPropertyFile(file);
 	}
 	
-	private void init(){
+	private void init() {
+		initServerInfo();
 		initHettySecurity();
 		initPlugins();
 		initServiceMetaData();
-		initBootstrap();
+		if (httpListenPort == -1 && httpsListenPort == -1) {
+			httpListenPort = 8081;//default port is 8081
+		}
+		if (httpListenPort != -1) {
+			initHttpBootstrap();
+		}
+		if (httpsListenPort != -1) {
+			initHttpsBootstrap();
+		}
 	}
-	
 	/**
-	 * init bootstrap
+	 * init hetty server info
 	 */
-    private void initBootstrap(){
-    	logger.info("init nettyBootstrap...........");
+	private void initServerInfo(){
+		httpListenPort = hettyConfig.getHttpPort();
+		httpsListenPort = hettyConfig.getHttpsPort();
+	}
+	/**
+	 * init http bootstrap
+	 */
+    private void initHttpBootstrap(){
+    	logger.info("init HTTP Bootstrap...........");
 		ThreadFactory serverBossTF = new NamedThreadFactory("HETTY-BOSS-");
 		ThreadFactory serverWorkerTF = new NamedThreadFactory("HETTY-WORKER-");
-		bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+		httpBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
 				Executors.newCachedThreadPool(serverBossTF),
 				Executors.newCachedThreadPool(serverWorkerTF)));
-		bootstrap.setOption("tcpNoDelay", Boolean.parseBoolean(hettyConfig
+		httpBootstrap.setOption("tcpNoDelay", Boolean.parseBoolean(hettyConfig
 				.getProperty("hetty.tcp.nodelay", "true")));
-		bootstrap.setOption("reuseAddress", Boolean.parseBoolean(hettyConfig
+		httpBootstrap.setOption("reuseAddress", Boolean.parseBoolean(hettyConfig
 				.getProperty("hetty.tcp.reuseaddress", "true")));
 		
 		int coreSize = hettyConfig.getServerCorePoolSize();
@@ -69,13 +90,43 @@ public final class Hetty {
 		ThreadFactory threadFactory = new NamedThreadFactory("hetty-");
 		ExecutorService threadPool = new ThreadPoolExecutor(coreSize, maxSize, keepAlive,
 				TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), threadFactory);
-		bootstrap.setPipelineFactory(new HettyChannelPipelineFactory(threadPool));
+		httpBootstrap.setPipelineFactory(new HettyChannelPipelineFactory(threadPool));
 		
-		listenPort = hettyConfig.getPort();
-		if (!checkConfig(listenPort)) {
-			throw new IllegalStateException("port: " + listenPort + " already in use!");
+		if (!checkPortConfig(httpListenPort)) {
+			throw new IllegalStateException("port: " + httpListenPort + " already in use!");
 		}
-		bootstrap.bind(new InetSocketAddress(listenPort));
+		httpBootstrap.bind(new InetSocketAddress(httpListenPort));
+    }
+    /**
+	 * init https bootstrap
+	 */
+    private void initHttpsBootstrap(){
+    	if(!checkHttpsConfig()){
+    		return;
+    	}
+    	logger.info("init HTTPS Bootstrap...........");
+		ThreadFactory serverBossTF = new NamedThreadFactory("HETTY-BOSS-");
+		ThreadFactory serverWorkerTF = new NamedThreadFactory("HETTY-WORKER-");
+		httpsBootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
+				Executors.newCachedThreadPool(serverBossTF),
+				Executors.newCachedThreadPool(serverWorkerTF)));
+		httpsBootstrap.setOption("tcpNoDelay", Boolean.parseBoolean(hettyConfig
+				.getProperty("hetty.tcp.nodelay", "true")));
+		httpsBootstrap.setOption("reuseAddress", Boolean.parseBoolean(hettyConfig
+				.getProperty("hetty.tcp.reuseaddress", "true")));
+		
+		int coreSize = hettyConfig.getServerCorePoolSize();
+		int maxSize = hettyConfig.getServerMaximumPoolSize();
+		int keepAlive = hettyConfig.getServerKeepAliveTime();
+		ThreadFactory threadFactory = new NamedThreadFactory("hetty-");
+		ExecutorService threadPool = new ThreadPoolExecutor(coreSize, maxSize, keepAlive,
+				TimeUnit.SECONDS, new SynchronousQueue<Runnable>(), threadFactory);
+		httpsBootstrap.setPipelineFactory(new SslHettyChannelPipelineFactory(threadPool));
+		
+		if (!checkPortConfig(httpsListenPort)) {
+			throw new IllegalStateException("port: " + httpsListenPort + " already in use!");
+		}
+		httpsBootstrap.bind(new InetSocketAddress(httpsListenPort));
     }
 
 	/**
@@ -121,7 +172,7 @@ public final class Hetty {
      * @param listenPort
      * @return
      */
-	private boolean checkConfig(int listenPort) {
+	private boolean checkPortConfig(int listenPort) {
 		if (listenPort < 0 || listenPort > 65536) {
 			throw new IllegalArgumentException("Invalid start port: "
 					+ listenPort);
@@ -149,11 +200,38 @@ public final class Hetty {
 		}
 		return false;
 	}
+	/**
+	 * check https config
+	 * @return
+	 */
+	private boolean  checkHttpsConfig(){
+		if(StringUtil.isNotEmpty(hettyConfig.getKeyStorePath())){
+			if(!FileUtil.getFile(hettyConfig.getKeyStorePath()).exists()){
+				throw new HettyException("we can't find the file which you configure:[ssl.keystore.file]");
+			}
+		}else if(StringUtil.isNotEmpty(hettyConfig.getCertificateKeyFile()) && 
+				StringUtil.isNotEmpty(hettyConfig.getCertificateFile())){
+			if(!FileUtil.getFile(hettyConfig.getCertificateKeyFile()).exists()){
+				throw new HettyException("we can't find the file which you configure:[ssl.certificate.key.file]");
+			}
+			if(!FileUtil.getFile(hettyConfig.getCertificateFile()).exists()){
+				throw new HettyException("we can't find the file which you configure:[ssl.certificate.file]");
+			}
+		}else{
+			throw new HettyException("please check your ssl's config.");
+		}
+		return true;
+	}
 	public void serverLog(){
 		logger.info("devMod:"+hettyConfig.getDevMod());
 		logger.info("server key:"+hettyConfig.getServerKey());
 		logger.info("server secret:"+hettyConfig.getServerSecret());
-		logger.info("Server started,listen at: "+listenPort);
+		if(httpListenPort != -1){
+			logger.info("Server started,listening for HTTP on port "+httpListenPort);
+		}
+		if(httpsListenPort != -1){
+			logger.info("Server started,listening for HTTPS on port "+httpsListenPort);
+		}
 	}
 	/**
 	 * start hetty
@@ -167,7 +245,12 @@ public final class Hetty {
 	 */
 	public void stop(){
 		logger.info("Server stop!");
-		bootstrap.releaseExternalResources();
+		if(httpBootstrap != null){
+			httpBootstrap.releaseExternalResources();
+		}
+		if(httpsBootstrap != null){
+			httpsBootstrap.releaseExternalResources();
+		}
 	}
 	public static void main(String[] args) {
 		new Hetty().start();

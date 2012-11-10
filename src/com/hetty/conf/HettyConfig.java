@@ -20,11 +20,12 @@ import com.hetty.util.StringUtil;
  *
  */
 public class HettyConfig {
-
+	
 	private static Logger logger = LoggerFactory.getLogger(HettyConfig.class);
 	
 	private static Properties properties = new Properties();
 	private static HettyConfig instance = null;
+	
 	private HettyConfig(){
 		
 	}
@@ -141,14 +142,64 @@ public class HettyConfig {
 	}
 
 	/**
-	 * get the server's port,default is 8080
+	 * get the server's HTTP port,default is -1
 	 * @return
 	 */
-	public int getPort() {
-		String port = properties.getProperty("server.port", "8080");
+	public int getHttpPort() {
+		String port = properties.getProperty("server.http.port", "-1");
+		return Integer.parseInt(port);
+	}
+	/**
+	 * get the server's HTTPS port,default is -1
+	 * @return
+	 */
+	public int getHttpsPort() {
+		String port = properties.getProperty("server.https.port", "-1");
 		return Integer.parseInt(port);
 	}
 
+	/**
+	 * get the ssl client auth
+	 * @return
+	 */
+	public String getClientAuth() {
+		return properties.getProperty("ssl.clientAuth", "none");
+	}
+	/**
+	 * get the ssl keystore file path
+	 * @return
+	 */
+	public String getKeyStorePath() {
+		return properties.getProperty("ssl.keystore.file");
+	}
+	/**
+	 * get the ssl keystore password
+	 * @return
+	 */
+	public String getKeyStorePassword() {
+		return properties.getProperty("ssl.keystore.password");
+	}
+	/**
+	 * get the ssl certificate key file path
+	 * @return
+	 */
+	public String getCertificateKeyFile() {
+		return properties.getProperty("ssl.certificate.key.file");
+	}
+	/**
+	 * get the ssl certificate  file path
+	 * @return
+	 */
+	public String getCertificateFile() {
+		return properties.getProperty("ssl.certificate.file");
+	}
+	/**
+	 * get the ssl certificate password
+	 * @return
+	 */
+	public String getCertificatePassword() {
+		return properties.getProperty("ssl.certificate.password");
+	}
 	/**
 	 * get the core number of threads
 	 * @return
