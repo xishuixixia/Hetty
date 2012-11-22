@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deployment>
+	<applications>
+		<application user="client1" password="client1"/>
+	</applications>
+
+	<services>
+<!-- 		<service name="basic" interface="test.BasicAPI"> -->
+<!-- 			<provider version="1" class="test.BasicService" default="true" /> -->
+<!-- 		</service> -->
+		<service name="hello" interface="test.example.Hello" overload="true">
+           <provider version="1" class="test.example.HelloImpl"/> 
+		   <provider version="2" class="test.example.Hello2Impl" default="true"/>
+		</service>
+<!-- 		<service name="hello" interface="test.example.Hello" overload="true"> -->
+<!-- 			<provider version="1" class="test.example.HelloImpl" default="true"/> -->
+<!-- 			<provider version="2" class="test.example.Hello2Impl"/> -->
+<!-- 		</service> -->
+	</services>
+
+	<security-settings>
+		<security-setting user="client1" service="hello" version="1" />
+	</security-settings>
+</deployment>
