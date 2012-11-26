@@ -79,11 +79,11 @@ public class HettyConfig {
 	}
 	
 	public String getProperty(String key) {
-		return properties.getProperty(key);
+		return properties.getProperty(key).trim();
 	}
 
 	public String getProperty(String key, String defaultValue) {
-		return properties.getProperty(key, defaultValue);
+		return properties.getProperty(key, defaultValue.trim());
 	}
 
 	public Properties getProperties() {
@@ -99,7 +99,7 @@ public class HettyConfig {
 		if (serverKey == null) {
 			throw new RuntimeException("we cannot find the server.key,please check and add.");
 		}
-		return serverKey;
+		return serverKey.trim();
 	}
 
 	/**
@@ -111,7 +111,7 @@ public class HettyConfig {
 		if (serverSecret == null) {
 			throw new RuntimeException("we cannot find the server.secret,please check and add.");
 		}
-		return serverSecret;
+		return serverSecret.trim();
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class HettyConfig {
 	 */
 	public String getpropertiesFile() {
 		String f = properties.getProperty("properties.file", "config.xml");
-		return f;
+		return f.trim();
 	}
 
 	/**
@@ -164,42 +164,42 @@ public class HettyConfig {
 	 * @return
 	 */
 	public String getClientAuth() {
-		return properties.getProperty("ssl.clientAuth", "none");
+		return properties.getProperty("ssl.clientAuth", "none").trim();
 	}
 	/**
 	 * get the ssl keystore file path
 	 * @return
 	 */
 	public String getKeyStorePath() {
-		return properties.getProperty("ssl.keystore.file");
+		return properties.getProperty("ssl.keystore.file").trim();
 	}
 	/**
 	 * get the ssl keystore password
 	 * @return
 	 */
 	public String getKeyStorePassword() {
-		return properties.getProperty("ssl.keystore.password");
+		return properties.getProperty("ssl.keystore.password").trim();
 	}
 	/**
 	 * get the ssl certificate key file path
 	 * @return
 	 */
 	public String getCertificateKeyFile() {
-		return properties.getProperty("ssl.certificate.key.file");
+		return properties.getProperty("ssl.certificate.key.file").trim();
 	}
 	/**
 	 * get the ssl certificate  file path
 	 * @return
 	 */
 	public String getCertificateFile() {
-		return properties.getProperty("ssl.certificate.file");
+		return properties.getProperty("ssl.certificate.file").trim();
 	}
 	/**
 	 * get the ssl certificate password
 	 * @return
 	 */
 	public String getCertificatePassword() {
-		return properties.getProperty("ssl.certificate.password");
+		return properties.getProperty("ssl.certificate.password").trim();
 	}
 	/**
 	 * get the core number of threads
