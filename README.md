@@ -20,6 +20,7 @@ properties.file=config.xml #配置service定义文件
 
 2.service配置
 
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment>
   <applications>
@@ -47,31 +48,37 @@ properties.file=config.xml #配置service定义文件
 <!-- 		<security-setting appKey="client1" service="basic" /> -->
 <!-- 	</security-settings> -->
 </deployment>
+```
 
 配置包括三部分，第一部分applications，配置客户端的user和密码，来做权限认证。第二部分配置service接口，比如：
+
+```xml
 <service name="basic" interface="test.BasicAPI">
   		<provider version="1" class="test.BasicService" default="true" />
 </service>
+```
+
 我们配置了test.BasicAPI接口，接口名字为basic，有一个版本，版本号为1，且为默认版本。
 第三部分配置客户端的调用的版本，比如可以配置client1调用basic接口的1版本。
 
 3.客户端调用
-
+```java
 public static void main(String[] args) throws MalformedURLException {
-		
-		String url = "http://localhost:8081/apis/hello/";
+	
+	String url = "http://localhost:8081/apis/hello/";
 
-		HessianProxyFactory factory = new HessianProxyFactory();
+	HessianProxyFactory factory = new HessianProxyFactory();
 
-		factory.setUser("server1");
+	factory.setUser("server1");
 
-		factory.setPassword("server1");
+	factory.setPassword("server1");
 
-		factory.setOverloadEnabled(true);
+	factory.setOverloadEnabled(true);
 
-		final Hello basic = (Hello) factory.create(Hello.class, url);
-		
-		System.out.println(basic.hello());
-		System.out.println(basic.hello("guolei"));
-		System.out.println(basic.hello("guolei","hetty"));
-	}
+	final Hello basic = (Hello) factory.create(Hello.class, url);
+	
+	System.out.println(basic.hello());
+	System.out.println(basic.hello("guolei"));
+	System.out.println(basic.hello("guolei","hetty"));
+}
+```
