@@ -7,6 +7,7 @@ Hessian实现，只是使用Netty重新实现了服务端。
 
 1.配置Hetty服务器。
 
+```xml
 server.devmod=false #配置开发模式
 server.key=server1 #配置服务器Key，用于认证
 server.secret=server1 #配置服务器secret，用于认证
@@ -17,6 +18,7 @@ server.thread.maxPoolSize=100
 server.thread.keepAliveTime=3000
 server.method.timeout=3000
 properties.file=config.xml #配置service定义文件
+```
 
 2.service配置
 
